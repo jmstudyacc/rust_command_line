@@ -8,7 +8,8 @@ fn main() {
     */
     let args: Vec<String> = env::args().collect(); // collect() turns iterator into a vector - collect() requires type annotation
 
-    let config = parse_config(&args);
+    // config now creates a new instance of the Config struct
+    let config = Config::new(&args);
 
     println!("Searching for '{}'", config.query);
     println!("In file {}", config.filename);
@@ -26,20 +27,12 @@ struct Config {
     filename: String,
 }
 
-// function to extract the argument parser with a reference to Vector args passed in
-// returns an instance of the Config struct
-fn parse_config(args: &[String]) -> Config {
-    /* Program name takes up arg[0] and we do not want to include this
-    So query is indexed from [1] and filename from [2]
+impl Config {
+    // creating a method via impl against Config is more idiomatic as we are returning Config struct
+    fn new(args: &[String]) -> Config {
+        let query = args[1].clone();
+        let filename = args[2].clone();
 
-    This function now contains the logic needed to define which argument goes in which variable.
-    The result is then passed to main()
-    */
-
-    // using clone() is easiest but inefficient way to get the data into the Config instance
-    // it is more simple and straightforward - sacrifice of performance is worth it here
-    let query = args[1].clone(); // value of the first argument passed - stored
-    let filename = args[2].clone(); // value of second argument passed - stored
-
-    Config { query, filename }
+        Config { query, filename }
+    }
 }
