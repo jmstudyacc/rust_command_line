@@ -2,6 +2,9 @@
 use std::error::Error;
 use std::{env, fs, process};
 
+// imports the library crate that has a public API available to test!
+use minigrep::Config;
+
 fn main() {
     /* args() function is nested two modules deep std::env::args, as a result convention states
     determines that the parent module is brought into scope and not just the function. This
@@ -23,42 +26,12 @@ fn main() {
     println!("Searching for '{}'", config.query);
     println!("In file {}", config.filename);
 
-    // isolating main() so it only provides configuration or error handling
-    run(config);
-}
+    // if run returns an error we return the error value and exit the code
+    // we return () if no error so we do not need to unwrap anything - we only care about errors
+    if let Err(e) = minigrep::run(config) {
+        println!("Application error: {}", e);
 
-// declaring run() to separate logic away from main() - returns a Result with a trait object Box<dyn Error> for error type
-// requires std::error::Error be imported - the error here will return a dynamic type that implements Error trait
-fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    // small change that extracts this code from main()
-    let contents = fs::read_to_string(config.filename)?;
-
-    println!("With text:\n{}", contents);
-
-    // this syntax is the idiomatic wy to call run for side effects only
-    // it does not return a value that is needed
-    Ok(())
-}
-
-// Using a struct helps to convey meaning that the two values are related
-// it also makes it easier for others to read the code later
-struct Config {
-    query: String,
-    filename: String,
-}
-
-impl Config {
-    // creating a method via impl against Config is more idiomatic as we are returning Config struct
-    fn new(args: &[String]) -> Result<Config, &'static str> {
-        // include a conditional check to catch basic input error
-        if args.len() < 3 {
-            // instead of calling panic! the function now returns an Err variant
-            return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
-
-        // returns an Ok() variant if not an error
-        Ok(Config { query, filename })
+        process::exit(1);
+        // print the error and exit
     }
 }
