@@ -1,5 +1,9 @@
 // bring module into scope as code uses the args() function - may panic due to invalid Unicode
-use std::{env, fs};
+use std::error::Error;
+use std::{env, fs, process};
+
+// imports the library crate that has a public API available to test!
+use minigrep::Config;
 
 fn main() {
     /* args() function is nested two modules deep std::env::args, as a result convention states
@@ -8,38 +12,26 @@ fn main() {
     */
     let args: Vec<String> = env::args().collect(); // collect() turns iterator into a vector - collect() requires type annotation
 
-    let config = parse_config(&args);
+    // config now creates a new instance of the Config struct
+    // main() needs to handle the Result value return
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        /* unwrap_or_else() requires you to define custom, non-panic! error handling
+         if the return is Ok() it acts like unwrap() otherwise it calls the code in the closure
+         an anonymous function defined and passed as an argument to unwrap_or_else()
+        */
+        println!("Problem passing arguments: {}", err);
+        process::exit(1);
+    });
 
     println!("Searching for '{}'", config.query);
     println!("In file {}", config.filename);
 
-    let contents =
-        fs::read_to_string(config.filename).expect("Something went wrong reading the file");
+    // if run returns an error we return the error value and exit the code
+    // we return () if no error so we do not need to unwrap anything - we only care about errors
+    if let Err(e) = minigrep::run(config) {
+        println!("Application error: {}", e);
 
-    println!("With text:\n{}", contents);
-}
-
-// Using a struct helps to convey meaning that the two values are related
-// it also makes it easier for others to read the code later
-struct Config {
-    query: String,
-    filename: String,
-}
-
-// function to extract the argument parser with a reference to Vector args passed in
-// returns an instance of the Config struct
-fn parse_config(args: &[String]) -> Config {
-    /* Program name takes up arg[0] and we do not want to include this
-    So query is indexed from [1] and filename from [2]
-
-    This function now contains the logic needed to define which argument goes in which variable.
-    The result is then passed to main()
-    */
-
-    // using clone() is easiest but inefficient way to get the data into the Config instance
-    // it is more simple and straightforward - sacrifice of performance is worth it here
-    let query = args[1].clone(); // value of the first argument passed - stored
-    let filename = args[2].clone(); // value of second argument passed - stored
-
-    Config { query, filename }
+        process::exit(1);
+        // print the error and exit
+    }
 }
