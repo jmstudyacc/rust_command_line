@@ -1,4 +1,5 @@
 // bring module into scope as code uses the args() function - may panic due to invalid Unicode
+use std::error::Error;
 use std::{env, fs, process};
 
 fn main() {
@@ -11,9 +12,10 @@ fn main() {
     // config now creates a new instance of the Config struct
     // main() needs to handle the Result value return
     let config = Config::new(&args).unwrap_or_else(|err| {
-        // unwrap_or_else() requires you to define custom, non-panic! error handling
-        // if the return is Ok() it acts like unwrap() otherwise it calls the code in the closure
-        // an anonymous function defined and passed as an argument to unwrap_or_else()
+        /* unwrap_or_else() requires you to define custom, non-panic! error handling
+         if the return is Ok() it acts like unwrap() otherwise it calls the code in the closure
+         an anonymous function defined and passed as an argument to unwrap_or_else()
+        */
         println!("Problem passing arguments: {}", err);
         process::exit(1);
     });
@@ -21,10 +23,21 @@ fn main() {
     println!("Searching for '{}'", config.query);
     println!("In file {}", config.filename);
 
-    let contents =
-        fs::read_to_string(config.filename).expect("Something went wrong reading the file");
+    // isolating main() so it only provides configuration or error handling
+    run(config);
+}
+
+// declaring run() to separate logic away from main() - returns a Result with a trait object Box<dyn Error> for error type
+// requires std::error::Error be imported - the error here will return a dynamic type that implements Error trait
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    // small change that extracts this code from main()
+    let contents = fs::read_to_string(config.filename)?;
 
     println!("With text:\n{}", contents);
+
+    // this syntax is the idiomatic wy to call run for side effects only
+    // it does not return a value that is needed
+    Ok(())
 }
 
 // Using a struct helps to convey meaning that the two values are related
