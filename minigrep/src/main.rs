@@ -12,8 +12,8 @@ fn main() {
     */
     let args: Vec<String> = env::args().collect(); // collect() turns iterator into a vector - collect() requires type annotation
 
-    // config now creates a new instance of the Config struct
-    // main() needs to handle the Result value return
+    /* config now creates a new instance of the Config struct
+    main() needs to handle the Result value return*/
     let config = Config::new(&args).unwrap_or_else(|err| {
         /* unwrap_or_else() requires you to define custom, non-panic! error handling
          if the return is Ok() it acts like unwrap() otherwise it calls the code in the closure
@@ -23,11 +23,11 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Searching for '{}'", config.query);
-    println!("In file {}", config.filename);
+    //println!("Searching for '{}'", config.query);
+    //println!("In file {}", config.filename);
 
-    // if run returns an error we return the error value and exit the code
-    // we return () if no error so we do not need to unwrap anything - we only care about errors
+    /* if run returns an error we return the error value and exit the code
+    we return () if no error so we do not need to unwrap anything - we only care about errors*/
     if let Err(e) = minigrep::run(config) {
         println!("Application error: {}", e);
 

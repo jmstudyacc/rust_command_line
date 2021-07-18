@@ -32,10 +32,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // small change that extracts this code from main()
     let contents = fs::read_to_string(config.filename)?;
 
-    println!("With text:\n{}", contents);
+    for line in search(&config.query, &contents) {
+        // this will print each line returned from the search function - for loop returns each line from search
+        println!("{}", line)
+    }
 
-    // this syntax is the idiomatic way to call run for side effects only
-    // it does not return a value that is needed
+    /*this syntax is the idiomatic way to call run for side effects only
+    it does not return a value that is needed*/
     Ok(())
 }
 
