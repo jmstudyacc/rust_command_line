@@ -2,7 +2,7 @@
 // std::env is used to check for environment variables - var() to be used
 
 use std::error::Error;
-use std::{env, fs};
+use std::fs;
 
 /* Using a struct helps to convey meaning that the two values are related
 it also makes it easier for others to read the code later
@@ -15,20 +15,11 @@ pub struct Config {
 
 impl Config {
     // creating a method via impl against Config is more idiomatic as we are returning Config struct
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        // include a conditional check to catch basic input error
-        if args.len() < 3 {
-            // instead of calling panic! the function now returns an Err variant
-            return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
-
-        // new var for case sensitivity, passed the name for case sensitivity ENV variable
-        // env::var returns a Result that is Ok if ENV Var is set or Err if ENV Var not set
-        // is_err() checks if Result returns Err - not checking the setting of ENV Var, just checking it has a value
-        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
-
+    pub fn new(
+        query: String,
+        filename: String,
+        case_sensitive: bool,
+    ) -> Result<Config, &'static str> {
         // returns an Ok() variant if not an error
         Ok(Config {
             query,
