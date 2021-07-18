@@ -70,12 +70,33 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     results
 }
 
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    /* the function is similar to the search function - difference is that the 'query' reference
+    will be made lowercase.
+
+    'query' will be set to lowercase and stored in a shadowed variable. This changes the type.
+    shadowed 'query' will now be a string due to the 'to_lowercase()' function. It creates new
+    data as opposed to referencing existing data.
+    */
+    let query = query.to_lowercase();
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.to_lowercase().contains(&query) {
+            // &query is used as 'contains()' is defined to take a String slice
+            results.push(line)
+        }
+    }
+
+    results
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn one_result() {
+    fn case_sensitive() {
         /* This test searches for the string 'duct'. The test to be searched
         contains three lines with one containing the string 'duct'.
 
@@ -84,8 +105,28 @@ mod tests {
         let contents = "\
         Rust:\n\
         safe, fast, productive.\n\
-        Pick three.";
+        Pick three.\
+        Duct tape.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn case_insensitive() {
+        /* This test searches for the string 'duct'. The test to be searched
+        contains three lines with one containing the string 'duct'.
+
+        Assertion states that the value returned contains only the line we expect.*/
+        let query = "rUst";
+        let contents = "\
+        Rust:\n\
+        safe, fast, productive.\n\
+        Pick three.\n\
+        Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents)
+        );
     }
 }
