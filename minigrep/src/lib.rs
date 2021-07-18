@@ -38,3 +38,28 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // it does not return a value that is needed
     Ok(())
 }
+
+// first iteration of this function will cause the test for 'one_result' to fail
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    vec![]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        /* This test searches for the string 'duct'. The test to be searched
+        contains three lines with one containing the string 'duct'.
+
+        Assertion states that the value returned contains only the line we expect.*/
+        let query = "duct";
+        let contents = "\
+        Rust:\
+        safe, fast, productive.\
+        Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
