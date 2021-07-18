@@ -1,5 +1,8 @@
 // bring module into scope as code uses the args() function - may panic due to invalid Unicode
 //use std::error::Error;
+extern crate clap;
+
+use clap::{load_yaml, App};
 use std::{env, process};
 
 // imports the library crate that has a public API available to test!
@@ -24,9 +27,6 @@ fn main() {
         eprintln!("Problem passing arguments: {}", err);
         process::exit(1);
     });
-
-    //println!("Searching for '{}'", config.query);
-    //println!("In file {}", config.filename);
 
     /* if run returns an error we return the error value and exit the code
     we return () if no error so we do not need to unwrap anything - we only care about errors*/
