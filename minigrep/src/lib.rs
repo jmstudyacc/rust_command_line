@@ -34,14 +34,37 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     println!("With text:\n{}", contents);
 
-    // this syntax is the idiomatic wy to call run for side effects only
+    // this syntax is the idiomatic way to call run for side effects only
     // it does not return a value that is needed
     Ok(())
 }
 
 // first iteration of this function will cause the test for 'one_result' to fail
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    vec![]
+    /*
+    the lifetime established here states that the return value should relate to the
+    variable 'contents' NOT the ref to 'query'
+
+    returned vec should contain string slices that reference slices of the argument
+    'contents'
+
+    1 - iterate over each line of contents
+    2 - check whether it contains the query string
+    3 - if matching, add to list of values to return
+    4 - if not, do nothing
+    5 - return the list of matching results
+    */
+    // create a mutable vector to store the results
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        // lines returns an iterator and is a built in function
+        if line.contains(query) {
+            // if the line being iterated over contains the query
+            results.push(line);
+        }
+    }
+    results
 }
 
 #[cfg(test)]
@@ -56,8 +79,8 @@ mod tests {
         Assertion states that the value returned contains only the line we expect.*/
         let query = "duct";
         let contents = "\
-        Rust:\
-        safe, fast, productive.\
+        Rust:\n\
+        safe, fast, productive.\n\
         Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));

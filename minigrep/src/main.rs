@@ -1,6 +1,6 @@
 // bring module into scope as code uses the args() function - may panic due to invalid Unicode
-use std::error::Error;
-use std::{env, fs, process};
+//use std::error::Error;
+use std::{env, process};
 
 // imports the library crate that has a public API available to test!
 use minigrep::Config;
