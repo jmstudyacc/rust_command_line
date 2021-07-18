@@ -1,13 +1,16 @@
 // Any code not in main() is moved here
+// std::env is used to check for environment variables - var() to be used
 
 use std::error::Error;
-use std::fs;
+use std::{env, fs};
 
-// Using a struct helps to convey meaning that the two values are related
-// it also makes it easier for others to read the code later
+/* Using a struct helps to convey meaning that the two values are related
+it also makes it easier for others to read the code later
+case sensitivity is trigger by T/F - run() will need to check for this */
 pub struct Config {
     pub query: String,
     pub filename: String,
+    pub case_sensitive: bool,
 }
 
 impl Config {
@@ -21,8 +24,17 @@ impl Config {
         let query = args[1].clone();
         let filename = args[2].clone();
 
+        // new var for case sensitivity, passed the name for case sensitivity ENV variable
+        // env::var returns a Result that is Ok if ENV Var is set or Err if ENV Var not set
+        // is_err() checks if Result returns Err - not checking the setting of ENV Var, just checking it has a value
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
+
         // returns an Ok() variant if not an error
-        Ok(Config { query, filename })
+        Ok(Config {
+            query,
+            filename,
+            case_sensitive,
+        })
     }
 }
 
@@ -32,7 +44,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // small change that extracts this code from main()
     let contents = fs::read_to_string(config.filename)?;
 
-    for line in search(&config.query, &contents) {
+    // check the value of case_sensitive to determine correct search function
+    let results = if config.case_sensitive {
+        search(&config.query, &contents)
+    } else {
+        search_case_insensitive(&config.query, &contents)
+    };
+
+    for line in results {
         // this will print each line returned from the search function - for loop returns each line from search
         println!("{}", line)
     }
@@ -130,3 +149,10 @@ mod tests {
         );
     }
 }
+
+// test 1: cargo run to poem.txt
+// test 2: set CASE_SENSITIVE env variable to 1
+//         $env:CASE_SENSITIVE=1/export CASE_SENSITIVE=1
+//         cargo run to poem.txt/ CASE_INSENSITIVE=1 cargo run to poem.txt
+
+// EXTRA: allow command line arguments to work as well
