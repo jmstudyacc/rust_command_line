@@ -3,7 +3,7 @@ This project covers work undertaken while studying 'The Book'. Chapter 12 provid
 An extension of the chapter is to make a variant of the project that accepts command line arguments.
 The vanilla iteration of the project uses positional args to parse the request.
 
-# Idiomatic Rust Branch
+## Idiomatic Rust Branch
 This branch was created to help take notes on the process. Instead of solely using commit history to track changes new branches have been created.
 Commit history of these new branches will still be leveraged. Any significant changes to the structure of the project leads to the creation of a new branch.
 
