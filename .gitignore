@@ -9,3 +9,8 @@
 # Added by cargo
 
 /target
+
+
+# CLion configuration
+/.idea/
+/minigrep/minigrep

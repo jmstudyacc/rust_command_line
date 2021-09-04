@@ -1,5 +1,3 @@
-// bring module into scope as code uses the args() function - may panic due to invalid Unicode
-//use std::error::Error;
 extern crate clap;
 
 use clap::{App, Arg};
@@ -9,19 +7,12 @@ use std::process;
 use minigrep::Config;
 
 fn main() {
-    /* args() function is nested two modules deep std::env::args, as a result convention states
-    determines that the parent module is brought into scope and not just the function. This
-    allows for use of other functions from std::env
-    */
-    //let args: Vec<String> = env::args().collect(); // collect() turns iterator into a vector - collect() requires type annotation
-
-    // let yaml = load_yaml!("cli.yaml");
-    // let m = App::from(yaml).get_matches();
-
     let matches = App::new("minigrep")
         .version("1.0")
         .author("James M. <jmstudyacc@gmail.com>")
-        .about("Does awesome things")
+        .about(
+            "Searches a file for a target query string and prints any line containing the query.",
+        )
         .arg(
             Arg::with_name("QUERY")
                 .short("q")
@@ -44,18 +35,19 @@ fn main() {
                 .long("case-sensitive")
                 .multiple(false)
                 .takes_value(false)
-                .help("Sets if search is case-sensitive or case insensitive")
+                .help("Sets if search is case-sensitive or case insensitive [default=false]")
                 .required(false),
         )
         .get_matches();
 
-    let query = String::from(matches.value_of("QUERY").unwrap());
-    let file = String::from(matches.value_of("FILE").unwrap());
-    let case = matches.is_present("CASE");
-
     /* config now creates a new instance of the Config struct
     main() needs to handle the Result value return*/
-    let config = Config::new(query, file, case).unwrap_or_else(|err| {
+    let config = Config::new(
+        String::from(matches.value_of("QUERY").unwrap()),
+        String::from(matches.value_of("FILE").unwrap()),
+        matches.is_present("CASE"),
+    )
+    .unwrap_or_else(|err| {
         /* unwrap_or_else() requires you to define custom, non-panic! error handling
          if the return is Ok() it acts like unwrap() otherwise it calls the code in the closure
          an anonymous function defined and passed as an argument to unwrap_or_else()

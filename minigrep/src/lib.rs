@@ -1,5 +1,4 @@
 // Any code not in main() is moved here
-// std::env is used to check for environment variables - var() to be used
 
 use std::error::Error;
 use std::fs;
@@ -33,6 +32,7 @@ impl Config {
 // requires std::error::Error be imported - the error here will return a dynamic type that implements Error trait
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // small change that extracts this code from main()
+    let mut count = 0;
     let contents = fs::read_to_string(config.filename)?;
 
     // check the value of case_sensitive to determine correct search function
@@ -44,9 +44,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     for line in results {
         // this will print each line returned from the search function - for loop returns each line from search
+        count += 1;
         println!("{}", line)
     }
 
+    println!(
+        "\nThere are {} lines containing the word '{}'.",
+        count, &config.query
+    );
     /*this syntax is the idiomatic way to call run for side effects only
     it does not return a value that is needed*/
     Ok(())
@@ -54,51 +59,19 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
 // first iteration of this function will cause the test for 'one_result' to fail
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    /*
-    the lifetime established here states that the return value should relate to the
-    variable 'contents' NOT the ref to 'query'
-
-    returned vec should contain string slices that reference slices of the argument
-    'contents'
-
-    1 - iterate over each line of contents
-    2 - check whether it contains the query string
-    3 - if matching, add to list of values to return
-    4 - if not, do nothing
-    5 - return the list of matching results
-    */
-    // create a mutable vector to store the results
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        // lines returns an iterator and is a built in function
-        if line.contains(query) {
-            // if the line being iterated over contains the query
-            results.push(line);
-        }
-    }
-    results
+    // uses the filter adaptor to only keep the lines that match the filter criteria
+    // the result is then collected into a new vector via collect() and returned
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    /* the function is similar to the search function - difference is that the 'query' reference
-    will be made lowercase.
-
-    'query' will be set to lowercase and stored in a shadowed variable. This changes the type.
-    shadowed 'query' will now be a string due to the 'to_lowercase()' function. It creates new
-    data as opposed to referencing existing data.
-    */
-    let query = query.to_lowercase();
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            // &query is used as 'contains()' is defined to take a String slice
-            results.push(line)
-        }
-    }
-
-    results
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query.to_lowercase()))
+        .collect()
 }
 
 #[cfg(test)]
