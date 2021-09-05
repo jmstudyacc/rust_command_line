@@ -13,4 +13,8 @@
 
 # CLion configuration
 /.idea/
+
+# Files not to upload to Github
 /minigrep/minigrep
+/minigrep/christmas_carol.txt
+/minigrep/poem.txt
